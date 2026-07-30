@@ -8,11 +8,11 @@ import { z } from 'zod';
 import { useAuth } from '@/lib/auth-context';
 import { UserRole } from '@/lib/types';
 import { toast } from 'sonner';
-import { Dumbbell, Mail, ShieldCheck, Zap, ArrowRight } from 'lucide-react';
+import { Dumbbell, Mail, Zap, ArrowRight } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
-  role: z.enum(['CUSTOMER', 'PROVIDER', 'ADMIN'] as const).default('CUSTOMER'),
+  role: z.enum(['CUSTOMER', 'PROVIDER', 'ADMIN'] as const),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
