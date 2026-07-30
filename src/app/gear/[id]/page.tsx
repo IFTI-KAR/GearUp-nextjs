@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { fetchApi } from '@/lib/api-client';
 import { GearItem, Review } from '@/lib/types';
@@ -107,10 +108,13 @@ export default function GearDetailPage() {
           {/* Gallery */}
           <div className="space-y-3">
             <div className="relative aspect-[16/10] w-full rounded-3xl overflow-hidden glass-panel border border-slate-800 bg-slate-900">
-              <img
+              <Image
                 src={data.images[activeImageIdx] || data.images[0]}
                 alt={data.title}
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 1024px) 100vw, 66vw"
+                className="object-cover"
+                priority
               />
               <div className="absolute top-4 left-4 flex items-center gap-2">
                 <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-950/80 text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
@@ -133,7 +137,7 @@ export default function GearDetailPage() {
                       activeImageIdx === idx ? 'border-emerald-400 scale-105' : 'border-slate-800 opacity-60 hover:opacity-100'
                     }`}
                   >
-                    <img src={img} alt="Thumbnail" className="w-full h-full object-cover" />
+                    <Image src={img} alt="Thumbnail" fill sizes="80px" className="object-cover" />
                   </button>
                 ))}
               </div>

@@ -1,11 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react';
 
-export default function PaymentCancelPage() {
+function CancelContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const orderId = searchParams.get('order_id');
@@ -44,5 +44,17 @@ export default function PaymentCancelPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PaymentCancelPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-lg mx-auto px-4 py-20 text-center">
+        <div className="h-64 rounded-3xl bg-slate-900 animate-pulse border border-slate-800" />
+      </div>
+    }>
+      <CancelContent />
+    </Suspense>
   );
 }

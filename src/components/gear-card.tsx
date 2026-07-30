@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { GearItem } from '@/lib/types';
 import { Star, MapPin, Tag, ArrowRight } from 'lucide-react';
 
@@ -12,10 +13,12 @@ export function GearCard({ gear }: GearCardProps) {
     <div className="group glass-card rounded-2xl overflow-hidden flex flex-col h-full border border-slate-800/80">
       {/* Thumbnail Header */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-900">
-        <img
+        <Image
           src={gear.images[0] || 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&q=80'}
           alt={gear.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
 

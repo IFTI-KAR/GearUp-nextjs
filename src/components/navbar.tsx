@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { UserRole } from '@/lib/types';
@@ -132,10 +133,12 @@ export function Navbar() {
           {user ? (
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2.5 bg-slate-900/90 border border-slate-800 rounded-full py-1 px-3">
-                <img
+                <Image
                   src={user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
                   alt={user.name}
-                  className="w-7 h-7 rounded-full object-cover border border-slate-700"
+                  width={28}
+                  height={28}
+                  className="rounded-full object-cover border border-slate-700"
                 />
                 <div className="flex flex-col text-left">
                   <span className="text-xs font-semibold text-white leading-none truncate max-w-[100px]">
