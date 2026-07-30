@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { fetchApi } from '@/lib/api-client';
@@ -10,7 +10,7 @@ import { Search, Filter, SlidersHorizontal, RefreshCw, Compass } from 'lucide-re
 
 const CATEGORIES = ['All', 'Cycling', 'Camping', 'Water Sports', 'Winter Sports', 'Fitness & Gym', 'Climbing'];
 
-export default function GearCatalogPage() {
+function CatalogContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get('category') || 'All';
   const initialSearch = searchParams.get('search') || '';
@@ -25,7 +25,7 @@ export default function GearCatalogPage() {
     if (searchParams.get('search')) setSearch(searchParams.get('search')!);
   }, [searchParams]);
 
-  const { data: gearList = [], isLoading, refetch } = useQuery({
+  const { data: gearList = [], isLoading } = useQuery({
     queryKey: ['gear-catalog', category, search, maxPrice],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -38,7 +38,6 @@ export default function GearCatalogPage() {
     },
   });
 
-  // Client-side sorting
   const sortedGear = [...gearList].sort((a, b) => {
     if (sortBy === 'price-asc') return a.pricePerDay - b.pricePerDay;
     if (sortBy === 'price-desc') return b.pricePerDay - a.pricePerDay;
@@ -170,5 +169,17 @@ export default function GearCatalogPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function GearCatalogPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-7xl mx-auto px-4 py-12 space-y-6">
+        <div className="h-48 rounded-3xl bg-slate-900 animate-pulse border border-slate-800" />
+      </div>
+    }>
+      <CatalogContent />
+    </Suspense>
   );
 }
