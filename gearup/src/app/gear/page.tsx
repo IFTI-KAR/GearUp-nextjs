@@ -28,8 +28,9 @@ function CatalogContent() {
     if (searchParams.get('search')) setSearch(searchParams.get('search')!);
   }, [searchParams]);
 
-  const { data: gearList = [], isLoading } = useQuery({
+  const { data: gearList = MOCK_GEAR_ITEMS, isLoading } = useQuery({
     queryKey: ['gear-catalog', category, search, maxPrice],
+    initialData: MOCK_GEAR_ITEMS,
     queryFn: async () => {
       const params = new URLSearchParams();
       if (category !== 'All') params.append('category', category);

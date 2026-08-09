@@ -69,8 +69,9 @@ export default function HomePage() {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
 
-  const { data: gearData, isLoading } = useQuery({
+  const { data: gearData = MOCK_GEAR_ITEMS, isLoading } = useQuery({
     queryKey: ['featured-gear'],
+    initialData: MOCK_GEAR_ITEMS,
     queryFn: async () => {
       const res = await fetchApi<GearItem[]>('/gear');
       return res.data && Array.isArray(res.data) && res.data.length > 0 ? res.data : MOCK_GEAR_ITEMS;
