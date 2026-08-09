@@ -1,4 +1,3 @@
 {
-  "buildCommand": "cd gearup && npm run build",
-  "outputDirectory": "gearup/out"
+  "buildCommand": "cd gearup && npm run build"
 }
