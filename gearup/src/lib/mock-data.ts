@@ -66,8 +66,8 @@ export const MOCK_GEAR_ITEMS: GearItem[] = [
     pricePerDay: 35,
     deposit: 100,
     images: [
-      'https://images.unsplash.com/photo-1517649763962-0c623266010b?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80'
+      'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&w=1200&q=80'
     ],
     brand: 'BOTE',
     specifications: {
@@ -94,8 +94,8 @@ export const MOCK_GEAR_ITEMS: GearItem[] = [
     pricePerDay: 40,
     deposit: 120,
     images: [
-      'https://images.unsplash.com/photo-1522056615691-da7b81069da2?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1565992441121-4367c2967103?auto=format&fit=crop&w=1200&q=80'
+      'https://images.unsplash.com/photo-1565992441121-4367c2967103?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1516100882582-96c3a05fe590?auto=format&fit=crop&w=1200&q=80'
     ],
     brand: 'Burton',
     specifications: {
