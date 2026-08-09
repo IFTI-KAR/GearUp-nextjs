@@ -1,0 +1,9 @@
+{
+  "buildCommand": "cd gearup && npm install && npm run build",
+  "outputDirectory": "gearup/.next",
+  "installCommand": "cd gearup && npm install",
+  "framework": "nextjs",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/$1" }
+  ]
+}
