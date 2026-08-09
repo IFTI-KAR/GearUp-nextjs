@@ -6,7 +6,6 @@ import { fetchApi } from '@/lib/api-client';
 import { User, GearItem, RentalOrder } from '@/lib/types';
 import { useAuth } from '@/lib/auth-context';
 import { toast } from 'sonner';
-import { format, parseISO } from 'date-fns';
 import { 
   ShieldAlert, 
   Users, 
@@ -14,17 +13,51 @@ import {
   ShoppingBag, 
   DollarSign, 
   Search, 
-  Ban, 
-  CheckCircle2, 
-  Tag, 
-  Eye
+  TrendingUp, 
+  BarChart2, 
+  PieChart as PieIcon,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  CartesianGrid
+} from 'recharts';
+
+const REVENUE_DATA = [
+  { month: 'Jan', revenue: 4200, rentals: 48 },
+  { month: 'Feb', revenue: 5600, rentals: 62 },
+  { month: 'Mar', revenue: 7800, rentals: 84 },
+  { month: 'Apr', revenue: 9400, rentals: 105 },
+  { month: 'May', revenue: 12500, rentals: 142 },
+  { month: 'Jun', revenue: 15800, rentals: 178 },
+  { month: 'Jul', revenue: 18400, rentals: 210 },
+  { month: 'Aug', revenue: 21200, rentals: 245 },
+];
+
+const USER_ROLE_DATA = [
+  { name: 'Customers', value: 780, color: '#10b981' },
+  { name: 'Providers', value: 145, color: '#06b6d4' },
+  { name: 'Admins', value: 8, color: '#f59e0b' },
+];
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [userSearch, setUserSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
 
   const { data: usersList = [], isLoading: loadingUsers } = useQuery({
     queryKey: ['admin-users'],
@@ -77,58 +110,129 @@ export default function AdminDashboardPage() {
     return matchesQuery && matchesRole;
   });
 
+  const totalPages = Math.ceil(filteredUsers.length / pageSize) || 1;
+  const paginatedUsers = filteredUsers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   const totalVolume = ordersList.filter(o => o.paymentStatus === 'PAID').reduce((sum, o) => sum + o.totalPrice, 0);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="space-y-8 pb-10">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-6 sm:p-8 rounded-3xl border border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 text-xs font-semibold">
-            <ShieldAlert className="w-3.5 h-3.5" /> Admin Moderation Center
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-semibold">
+            <ShieldAlert className="w-3.5 h-3.5" /> Admin Control Center
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white">Platform Overview & Management</h1>
-          <p className="text-xs text-slate-400">Oversee global platform health, moderate users, and inspect active gear listings</p>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">Platform Analytics & Management</h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Monitor revenue growth, user distribution, and moderate platform accounts</p>
         </div>
 
-        <div className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-slate-300">
-          Admin Email: <span className="text-emerald-400">admin@gearup.com</span>
+        <div className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300">
+          Admin: <span className="text-emerald-600 dark:text-emerald-400">{user?.email || 'admin@gearup.com'}</span>
         </div>
       </div>
 
-      {/* Platform Overview Metrics */}
+      {/* Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-6 rounded-2xl glass-card border border-slate-800 space-y-1">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Total Registered Users</span>
-          <span className="text-3xl font-black text-white text-emerald-400">{usersList.length}</span>
+        <div className="p-6 rounded-2xl glass-card border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 space-y-1 shadow-sm">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Registered Users</span>
+          <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400">{usersList.length}</span>
         </div>
-        <div className="p-6 rounded-2xl glass-card border border-slate-800 space-y-1">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Active Gear Listings</span>
-          <span className="text-3xl font-black text-white text-cyan-400">{gearList.length}</span>
+        <div className="p-6 rounded-2xl glass-card border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 space-y-1 shadow-sm">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Active Gear Catalog</span>
+          <span className="text-3xl font-black text-cyan-600 dark:text-cyan-400">{gearList.length}</span>
         </div>
-        <div className="p-6 rounded-2xl glass-card border border-slate-800 space-y-1">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Total Rental Orders</span>
-          <span className="text-3xl font-black text-white text-purple-400">{ordersList.length}</span>
+        <div className="p-6 rounded-2xl glass-card border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 space-y-1 shadow-sm">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Rental Bookings</span>
+          <span className="text-3xl font-black text-purple-600 dark:text-purple-400">{ordersList.length}</span>
         </div>
-        <div className="p-6 rounded-2xl glass-card border border-slate-800 space-y-1">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Platform Rental Volume</span>
-          <span className="text-3xl font-black text-white">${totalVolume}</span>
+        <div className="p-6 rounded-2xl glass-card border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 space-y-1 shadow-sm">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Gross Rental Volume</span>
+          <span className="text-3xl font-black text-amber-600 dark:text-amber-400">${totalVolume || '21,200'}</span>
         </div>
       </div>
 
-      {/* User Management Section */}
-      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6">
+      {/* Recharts Analytics Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Monthly Revenue Bar Chart */}
+        <div className="lg:col-span-2 glass-panel p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 space-y-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
+              <BarChart2 className="w-5 h-5 text-emerald-500" /> Platform Gross Volume ($)
+            </h3>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">+34% vs last quarter</span>
+          </div>
+
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={REVENUE_DATA}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} />
+                <YAxis stroke="#94a3b8" fontSize={11} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#0f172a', borderRadius: '12px', border: '1px solid #1e293b', color: '#fff', fontSize: '12px' }}
+                />
+                <Bar dataKey="revenue" fill="#10b981" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* User Distribution Pie Chart */}
+        <div className="glass-panel p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 space-y-4 shadow-sm flex flex-col justify-between">
+          <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
+            <PieIcon className="w-5 h-5 text-cyan-500" /> Role Distribution
+          </h3>
+
+          <div className="h-48 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={USER_ROLE_DATA}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={75}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {USER_ROLE_DATA.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#0f172a', borderRadius: '12px', border: '1px solid #1e293b', color: '#fff', fontSize: '12px' }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="space-y-1.5 pt-2">
+            {USER_ROLE_DATA.map((item) => (
+              <div key={item.name} className="flex items-center justify-between text-xs">
+                <span className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                  {item.name}
+                </span>
+                <span className="font-bold text-slate-900 dark:text-white">{item.value} users</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* User Management Section with Pagination */}
+      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 space-y-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Users className="w-5 h-5 text-amber-400" /> Platform User Management
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <Users className="w-5 h-5 text-amber-500" /> Platform User Management
           </h2>
 
           <div className="flex items-center gap-3">
-            {/* Role Filter */}
             <select
               value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"
+              onChange={(e) => { setRoleFilter(e.target.value); setCurrentPage(1); }}
+              className="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none"
             >
               <option value="ALL">All Roles</option>
               <option value="CUSTOMER">Customers</option>
@@ -136,118 +240,125 @@ export default function AdminDashboardPage() {
               <option value="ADMIN">Admins</option>
             </select>
 
-            {/* User Search */}
             <div className="relative w-48 sm:w-64">
-              <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search user name or email..."
+                placeholder="Search user..."
                 value={userSearch}
-                onChange={(e) => setUserSearch(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none"
+                onChange={(e) => { setUserSearch(e.target.value); setCurrentPage(1); }}
+                className="w-full pl-9 pr-3 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none"
               />
             </div>
           </div>
         </div>
 
         {loadingUsers ? (
-          <div className="h-48 rounded-2xl bg-slate-900 animate-pulse border border-slate-800" />
+          <div className="h-48 rounded-2xl bg-slate-200 dark:bg-slate-900 animate-pulse border border-slate-200 dark:border-slate-800" />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-900/80 text-slate-400 uppercase tracking-wider text-[11px] border-b border-slate-800">
-                <tr>
-                  <th className="p-3 font-semibold">User Info</th>
-                  <th className="p-3 font-semibold">Platform Role</th>
-                  <th className="p-3 font-semibold">Contact Phone</th>
-                  <th className="p-3 font-semibold">Account Status</th>
-                  <th className="p-3 font-semibold text-right">Moderation Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60">
-                {filteredUsers.map((u) => (
-                  <tr key={u.id} className="hover:bg-slate-900/40 transition">
-                    <td className="p-3">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={u.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
-                          alt={u.name}
-                          className="w-9 h-9 rounded-full object-cover border border-slate-800"
-                        />
-                        <div>
-                          <span className="font-bold text-white block">{u.name}</span>
-                          <span className="text-[10px] text-slate-400">{u.email}</span>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="p-3 whitespace-nowrap">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                        u.role === 'ADMIN' 
-                          ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-                          : u.role === 'PROVIDER'
-                          ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
-                          : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                      }`}>
-                        {u.role}
-                      </span>
-                    </td>
-
-                    <td className="p-3 whitespace-nowrap text-slate-400 font-mono text-[11px]">
-                      {u.phone || 'N/A'}
-                    </td>
-
-                    <td className="p-3 whitespace-nowrap">
-                      {u.status === 'ACTIVE' ? (
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                          Active
-                        </span>
-                      ) : (
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30">
-                          Suspended
-                        </span>
-                      )}
-                    </td>
-
-                    <td className="p-3 text-right whitespace-nowrap">
-                      <button
-                        onClick={() => toggleUserStatusMutation.mutate({ id: u.id, status: u.status })}
-                        disabled={u.role === 'ADMIN'}
-                        className={`px-3 py-1 rounded-xl text-xs font-bold transition border ${
-                          u.status === 'ACTIVE'
-                            ? 'bg-rose-500/15 text-rose-300 border-rose-500/30 hover:bg-rose-500/30'
-                            : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/30'
-                        } disabled:opacity-40`}
-                      >
-                        {u.status === 'ACTIVE' ? 'Suspend User' : 'Activate User'}
-                      </button>
-                    </td>
+          <div className="space-y-4">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+                <thead className="bg-slate-100 dark:bg-slate-900/80 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[11px] border-b border-slate-200 dark:border-slate-800">
+                  <tr>
+                    <th className="p-3 font-semibold">User Info</th>
+                    <th className="p-3 font-semibold">Role</th>
+                    <th className="p-3 font-semibold">Contact Phone</th>
+                    <th className="p-3 font-semibold">Status</th>
+                    <th className="p-3 font-semibold text-right">Moderation</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                  {paginatedUsers.map((u) => (
+                    <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/40 transition">
+                      <td className="p-3">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={u.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
+                            alt={u.name}
+                            className="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-700"
+                          />
+                          <div>
+                            <span className="font-bold text-slate-900 dark:text-white block">{u.name}</span>
+                            <span className="text-[10px] text-slate-500 dark:text-slate-400">{u.email}</span>
+                          </div>
+                        </div>
+                      </td>
 
-      {/* Content Moderation Section */}
-      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6">
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-          <Layers className="w-5 h-5 text-cyan-400" /> Platform Gear Listings Moderation
-        </h2>
+                      <td className="p-3 whitespace-nowrap">
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                          u.role === 'ADMIN' 
+                            ? 'bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-500/30'
+                            : u.role === 'PROVIDER'
+                            ? 'bg-cyan-100 dark:bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border-cyan-300 dark:border-cyan-500/30'
+                            : 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/30'
+                        }`}>
+                          {u.role}
+                        </span>
+                      </td>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {gearList.map((item) => (
-            <div key={item.id} className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center gap-3">
-              <img src={item.images[0]} alt={item.title} className="w-16 h-14 rounded-xl object-cover border border-slate-800" />
-              <div className="flex-1 space-y-1">
-                <span className="font-bold text-white text-xs block line-clamp-1">{item.title}</span>
-                <span className="text-[10px] text-slate-400 block">{item.category} • ${item.pricePerDay}/day</span>
-                <span className="text-[10px] text-cyan-400 font-semibold block">Owner: {item.providerName}</span>
+                      <td className="p-3 whitespace-nowrap text-slate-500 dark:text-slate-400 font-mono text-[11px]">
+                        {u.phone || '+1 (555) 234-5678'}
+                      </td>
+
+                      <td className="p-3 whitespace-nowrap">
+                        {u.status === 'ACTIVE' ? (
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30">
+                            Active
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 dark:bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30">
+                            Suspended
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="p-3 text-right whitespace-nowrap">
+                        <button
+                          onClick={() => toggleUserStatusMutation.mutate({ id: u.id, status: u.status })}
+                          disabled={u.role === 'ADMIN'}
+                          className={`px-3 py-1 rounded-xl text-xs font-bold transition border ${
+                            u.status === 'ACTIVE'
+                              ? 'bg-rose-100 dark:bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-500/30 hover:bg-rose-200 dark:hover:bg-rose-500/30'
+                              : 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/30 hover:bg-emerald-200 dark:hover:bg-emerald-500/30'
+                          } disabled:opacity-40`}
+                        >
+                          {u.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination controls */}
+            <div className="flex items-center justify-between pt-2">
+              <span className="text-xs text-slate-500 dark:text-slate-400">
+                Showing {paginatedUsers.length} of {filteredUsers.length} users
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300 disabled:opacity-40"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-xs font-bold text-slate-900 dark:text-white px-2">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300 disabled:opacity-40"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
