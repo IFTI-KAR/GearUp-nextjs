@@ -8,6 +8,12 @@ interface BlogDetailProps {
   params: Promise<{ id: string }>;
 }
 
+export async function generateStaticParams() {
+  return BLOG_POSTS.map((post) => ({
+    id: post.id,
+  }));
+}
+
 export async function generateMetadata({ params }: BlogDetailProps) {
   const resolvedParams = await params;
   const post = BLOG_POSTS.find((p) => p.id === resolvedParams.id);

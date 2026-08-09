@@ -1,0 +1,18 @@
+{
+  "name": "gearup-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GearUp - Rent Sports & Outdoor Gear Instantly",
+  "scripts": {
+    "dev": "npm --prefix gearup run dev",
+    "dev:all": "concurrently \"npm --prefix gearup run dev\" \"npm --prefix gearup/server run dev\"",
+    "build": "npm --prefix gearup run build",
+    "start": "npm --prefix gearup run start",
+    "server:dev": "npm --prefix gearup/server run dev",
+    "server:build": "npm --prefix gearup/server run build",
+    "server:start": "npm --prefix gearup/server run start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

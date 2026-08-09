@@ -1,5 +1,5 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "gearup/dist",
+  "outputDirectory": "dist",
   "cleanUrls": true
 }
