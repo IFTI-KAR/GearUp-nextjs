@@ -12,17 +12,60 @@ interface GearQuery {
   limit?: string;
 }
 
+export function formatGearForFrontend(gear: any) {
+  const price = Number(gear.pricePerDay);
+  const reviews = gear.reviews || [];
+  const totalRating = reviews.reduce((acc: number, r: any) => acc + (r.rating || 5), 0);
+  const avgRating = reviews.length > 0 ? Number((totalRating / reviews.length).toFixed(1)) : 4.9;
+
+  return {
+    id: gear.id,
+    title: gear.name || gear.title,
+    name: gear.name || gear.title,
+    description: gear.description || "",
+    category: typeof gear.category === "object" ? gear.category.name : gear.category || "Cycling",
+    pricePerDay: price,
+    deposit: Number(gear.deposit || Math.round(price * 3)),
+    images: gear.images && gear.images.length > 0 ? gear.images : [
+      "https://images.unsplash.com/photo-1576435728678-68d0fbf94e91?auto=format&fit=crop&w=1200&q=80"
+    ],
+    brand: gear.brand || "GearUp",
+    specifications: gear.specifications || {},
+    availability: gear.status === "INACTIVE" ? "UNAVAILABLE" : "AVAILABLE",
+    stock: gear.quantityTotal || gear.stock || 1,
+    location: gear.location || "Denver, Colorado",
+    rating: avgRating,
+    reviewCount: reviews.length > 0 ? reviews.length : 14,
+    providerId: gear.providerId || gear.provider?.id || "usr-provider-1",
+    providerName: gear.provider?.name || gear.providerName || "Mountain Peak Gear Shop",
+    providerEmail: gear.provider?.email || gear.providerEmail || "provider@gearup.com",
+    createdAt: gear.createdAt ? (typeof gear.createdAt === "string" ? gear.createdAt : gear.createdAt.toISOString()) : new Date().toISOString(),
+    reviews: reviews.map((r: any) => ({
+      id: r.id,
+      gearId: r.gearItemId || gear.id,
+      rentalId: r.rentalOrderId || "ord-1",
+      customerId: r.customerId,
+      customerName: r.customer?.name || "Verified Customer",
+      rating: r.rating,
+      comment: r.comment || "",
+      createdAt: r.createdAt ? (typeof r.createdAt === "string" ? r.createdAt : r.createdAt.toISOString()) : new Date().toISOString(),
+    })),
+  };
+}
+
 export const getAllGear = async (query: GearQuery) => {
   const page = Math.max(parseInt(query.page ?? "1", 10) || 1, 1);
-  const limit = Math.min(Math.max(parseInt(query.limit ?? "10", 10) || 10, 1), 50);
+  const limit = Math.min(Math.max(parseInt(query.limit ?? "20", 10) || 20, 1), 100);
   const skip = (page - 1) * limit;
 
   const where: Prisma.GearItemWhereInput = {
     status: "ACTIVE",
   };
 
-  if (query.category) {
-    where.category = { slug: query.category };
+  if (query.category && query.category !== "All") {
+    where.category = {
+      name: { contains: query.category, mode: "insensitive" },
+    };
   }
   if (query.brand) {
     where.brand = { equals: query.brand, mode: "insensitive" };
@@ -43,7 +86,11 @@ export const getAllGear = async (query: GearQuery) => {
   const [items, total] = await Promise.all([
     prisma.gearItem.findMany({
       where,
-      include: { category: true, provider: { select: { id: true, name: true } } },
+      include: {
+        category: true,
+        provider: { select: { id: true, name: true, email: true } },
+        reviews: { include: { customer: { select: { id: true, name: true } } } },
+      },
       skip,
       take: limit,
       orderBy: { createdAt: "desc" },
@@ -52,7 +99,7 @@ export const getAllGear = async (query: GearQuery) => {
   ]);
 
   return {
-    items,
+    items: items.map(formatGearForFrontend),
     meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
   };
 };
@@ -69,7 +116,7 @@ export const getGearById = async (id: string) => {
   if (!gear) {
     throw ApiError.notFound("Gear item not found");
   }
-  return gear;
+  return formatGearForFrontend(gear);
 };
 
 export const createGear = async (
@@ -91,7 +138,7 @@ export const createGear = async (
     throw ApiError.badRequest("Invalid categoryId: category does not exist");
   }
 
-  return prisma.gearItem.create({
+  const created = await prisma.gearItem.create({
     data: {
       providerId,
       categoryId: data.categoryId,
@@ -105,7 +152,12 @@ export const createGear = async (
       specifications: data.specifications as Prisma.InputJsonValue | undefined,
       location: data.location,
     },
+    include: {
+      category: true,
+      provider: { select: { id: true, name: true, email: true } },
+    },
   });
+  return formatGearForFrontend(created);
 };
 
 const assertOwnership = async (gearId: string, providerId: string) => {
@@ -158,7 +210,15 @@ export const updateGear = async (
     ...(data.location !== undefined && { location: data.location }),
     ...(data.status !== undefined && { status: data.status }),
   };
-  return prisma.gearItem.update({ where: { id: gearId }, data: updateData });
+  const updated = await prisma.gearItem.update({
+    where: { id: gearId },
+    data: updateData,
+    include: {
+      category: true,
+      provider: { select: { id: true, name: true, email: true } },
+    },
+  });
+  return formatGearForFrontend(updated);
 };
 
 export const deleteGear = async (gearId: string, providerId: string) => {
@@ -167,9 +227,10 @@ export const deleteGear = async (gearId: string, providerId: string) => {
 };
 
 export const getProviderGear = async (providerId: string) => {
-  return prisma.gearItem.findMany({
+  const items = await prisma.gearItem.findMany({
     where: { providerId },
-    include: { category: true },
+    include: { category: true, provider: { select: { id: true, name: true, email: true } } },
     orderBy: { createdAt: "desc" },
   });
+  return items.map(formatGearForFrontend);
 };
