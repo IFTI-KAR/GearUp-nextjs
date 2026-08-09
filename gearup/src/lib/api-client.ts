@@ -55,12 +55,12 @@ export async function fetchApi<T = any>(
 
     if (res.ok) {
       const data = await res.json();
-      if (data && data.success !== false) {
+      if (data && data.success === true && data.data !== undefined) {
         return data;
       }
     }
   } catch (err) {
-    // Network error or server offline -> fallback to mock data engine
+    // Network error, HTML response or server offline -> fallback
   }
 
   return handleMockFallback<T>(endpoint, options);
@@ -121,6 +121,11 @@ function handleMockFallback<T>(endpoint: string, options: RequestInit): ApiRespo
     }
     if (providerId) {
       list = list.filter(g => g.providerId === providerId || true);
+    }
+
+    // Ensure non-empty fallback
+    if (list.length === 0 && !search && category === 'All') {
+      list = [...MOCK_GEAR_ITEMS];
     }
 
     return { success: true, data: list as any };
@@ -222,5 +227,5 @@ function handleMockFallback<T>(endpoint: string, options: RequestInit): ApiRespo
     };
   }
 
-  return { success: true, data: [] as any };
+  return { success: true, data: MOCK_GEAR_ITEMS as any };
 }

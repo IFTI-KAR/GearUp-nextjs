@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { fetchApi } from '@/lib/api-client';
+import { MOCK_GEAR_ITEMS } from '@/lib/mock-data';
 import { GearItem } from '@/lib/types';
 import { GearCard } from '@/components/gear-card';
 import { Search, Filter, SlidersHorizontal, RefreshCw, Compass, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -36,7 +37,10 @@ function CatalogContent() {
       params.append('maxPrice', maxPrice.toString());
 
       const res = await fetchApi<GearItem[]>(`/gear?${params.toString()}`);
-      return res.data || [];
+      if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+        return res.data;
+      }
+      return MOCK_GEAR_ITEMS;
     },
   });
 

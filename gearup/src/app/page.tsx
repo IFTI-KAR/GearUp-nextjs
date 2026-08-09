@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { fetchApi } from '@/lib/api-client';
+import { MOCK_GEAR_ITEMS } from '@/lib/mock-data';
 import { GearItem } from '@/lib/types';
 import { GearCard } from '@/components/gear-card';
 import { toast } from 'sonner';
@@ -72,7 +73,7 @@ export default function HomePage() {
     queryKey: ['featured-gear'],
     queryFn: async () => {
       const res = await fetchApi<GearItem[]>('/gear');
-      return res.data || [];
+      return res.data && Array.isArray(res.data) && res.data.length > 0 ? res.data : MOCK_GEAR_ITEMS;
     },
   });
 
