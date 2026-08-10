@@ -265,6 +265,32 @@ function handleMockFallback<T>(endpoint: string, options: RequestInit): ApiRespo
     };
   }
 
+  // 9. /auth/login (mock — demo credentials for each role)
+  if (cleanPath === '/auth/login') {
+    const body = options.body ? JSON.parse(options.body as string) : {};
+    const email = (body.email || '').toLowerCase();
+    const requestedRole = body.role || 'CUSTOMER';
+    const user =
+      MOCK_USERS.find(u => u.email.toLowerCase() === email) ||
+      MOCK_USERS.find(u => u.role === requestedRole) ||
+      MOCK_USERS[MOCK_USERS.length - 1];
+    return { success: true, data: { user, token: `token-${user.role.toLowerCase()}` } as any };
+  }
+
+  // 10. /auth/register (mock)
+  if (cleanPath === '/auth/register') {
+    const body = options.body ? JSON.parse(options.body as string) : {};
+    const user: User = {
+      id: `usr-reg-${Date.now()}`,
+      name: body.name || 'New User',
+      email: body.email || '',
+      role: body.role || 'CUSTOMER',
+      status: 'ACTIVE',
+      createdAt: new Date().toISOString(),
+    };
+    return { success: true, data: { user, token: 'token-register-demo' } as any };
+  }
+
   // Default catch-all
   return { success: true, data: MOCK_GEAR_ITEMS as any };
 }
