@@ -9,32 +9,32 @@ interface StatusBadgeProps {
 const STATUS_CONFIG: Record<OrderStatus, { label: string; className: string }> = {
   PLACED: {
     label: 'Order Placed',
-    className: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+    className: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
   },
   CONFIRMED: {
     label: 'Confirmed',
-    className: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
+    className: 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border-cyan-500/30',
   },
   PAID: {
     label: 'Paid',
-    className: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
+    className: 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30',
   },
   PICKED_UP: {
     label: 'Picked Up',
-    className: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+    className: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
   },
   RETURNED: {
     label: 'Returned',
-    className: 'bg-slate-500/15 text-slate-300 border-slate-500/30',
+    className: 'bg-slate-500/15 text-slate-600 dark:text-slate-300 border-slate-500/30',
   },
   CANCELLED: {
     label: 'Cancelled',
-    className: 'bg-red-500/15 text-red-400 border-red-500/30',
+    className: 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30',
   },
 };
 
 export function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
-  const config = STATUS_CONFIG[status] || { label: status, className: 'bg-slate-700 text-slate-300' };
+  const config = STATUS_CONFIG[status] || { label: status, className: 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300' };
 
   const sizeClasses = {
     sm: 'text-xs px-2 py-0.5',

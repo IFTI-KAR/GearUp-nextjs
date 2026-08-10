@@ -8,6 +8,7 @@ import { RentalOrder } from '@/lib/types';
 import { useAuth } from '@/lib/auth-context';
 import { StatusBadge } from '@/components/status-badge';
 import { toast } from 'sonner';
+import { format, parseISO } from 'date-fns';
 import { 
   ShoppingBag, 
   Clock, 
@@ -27,14 +28,18 @@ import {
   CartesianGrid
 } from 'recharts';
 
-const CUSTOMER_SPENDING_DATA = [
-  { month: 'Mar', spent: 120 },
-  { month: 'Apr', spent: 250 },
-  { month: 'May', spent: 180 },
-  { month: 'Jun', spent: 450 },
-  { month: 'Jul', spent: 380 },
-  { month: 'Aug', spent: 620 },
-];
+const SPENDING_MONTHS = ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
+
+const buildSpendingChart = (orders: RentalOrder[]) => {
+  const sums = new Map<string, number>();
+  orders
+    .filter(o => o.paymentStatus === 'COMPLETED' || o.status === 'PAID')
+    .forEach(o => {
+      const key = o.createdAt ? format(parseISO(o.createdAt), 'MMM') : 'Aug';
+      sums.set(key, (sums.get(key) || 0) + (Number(o.totalPrice) || 0));
+    });
+  return SPENDING_MONTHS.map(month => ({ month, spent: sums.get(month) || 0 }));
+};
 
 export default function CustomerDashboardPage() {
   const { user } = useAuth();
@@ -58,10 +63,8 @@ export default function CustomerDashboardPage() {
       const res = await fetchApi('/reviews', {
         method: 'POST',
         body: JSON.stringify({
-          gearId: reviewModalOrder.gearId,
-          rentalId: reviewModalOrder.id,
-          customerId: user?.id || 'usr-customer-1',
-          customerName: user?.name || 'Alex Johnson',
+          gearItemId: reviewModalOrder.gearId,
+          rentalOrderId: reviewModalOrder.id,
           rating: reviewRating,
           comment: reviewComment,
         }),
@@ -82,7 +85,8 @@ export default function CustomerDashboardPage() {
 
   const activeRentals = orders.filter(o => o.status === 'PLACED' || o.status === 'CONFIRMED' || o.status === 'PAID' || o.status === 'PICKED_UP');
   const completedRentals = orders.filter(o => o.status === 'RETURNED');
-  const totalSpent = orders.filter(o => o.paymentStatus === 'PAID').reduce((acc, o) => acc + o.totalPrice, 0);
+  const totalSpent = orders.filter(o => o.paymentStatus === 'COMPLETED').reduce((acc, o) => acc + o.totalPrice, 0);
+  const spendingChartData = buildSpendingChart(orders);
 
   return (
     <div className="space-y-8 pb-10">
@@ -116,7 +120,7 @@ export default function CustomerDashboardPage() {
         </div>
         <div className="p-6 rounded-2xl glass-card border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 space-y-1 shadow-sm">
           <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Total Spent</span>
-          <span className="text-3xl font-black text-purple-600 dark:text-purple-400">${totalSpent || 620}</span>
+          <span className="text-3xl font-black text-purple-600 dark:text-purple-400">${totalSpent}</span>
         </div>
       </div>
 
@@ -127,7 +131,7 @@ export default function CustomerDashboardPage() {
         </h3>
         <div className="h-56 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={CUSTOMER_SPENDING_DATA}>
+            <AreaChart data={spendingChartData}>
               <defs>
                 <linearGradient id="spendingGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
@@ -210,7 +214,7 @@ export default function CustomerDashboardPage() {
                     </td>
 
                     <td className="p-3 whitespace-nowrap">
-                      {order.paymentStatus === 'PAID' ? (
+                      {order.paymentStatus === 'COMPLETED' ? (
                         <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30">
                           Paid
                         </span>
@@ -222,7 +226,7 @@ export default function CustomerDashboardPage() {
                     </td>
 
                     <td className="p-3 text-right whitespace-nowrap">
-                      {order.status === 'CONFIRMED' && order.paymentStatus !== 'PAID' && (
+                      {order.status === 'CONFIRMED' && order.paymentStatus !== 'COMPLETED' && (
                         <Link
                           href={`/dashboard/customer/orders/${order.id}/pay`}
                           className="px-3 py-1.5 rounded-lg bg-emerald-500 text-white dark:text-slate-950 font-bold text-xs hover:bg-emerald-400 transition shadow-md shadow-emerald-500/20 inline-flex items-center gap-1"

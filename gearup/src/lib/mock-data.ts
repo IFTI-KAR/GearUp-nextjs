@@ -3,7 +3,7 @@ import { GearItem, RentalOrder, Review } from './types';
 export const MOCK_GEAR_ITEMS: GearItem[] = [
   {
     id: '1',
-    title: 'Trek Marlin 7 Gen 3 Mountain Bike',
+    name: 'Trek Marlin 7 Gen 3 Mountain Bike',
     description: 'Race-ready cross-country mountain bike featuring a lightweight Alpha Gold Aluminum frame, RockShox Judy fork with hydraulic lockout, and Shimano Deore 1x10 drivetrain.',
     category: 'Cycling',
     pricePerDay: 45,
@@ -20,8 +20,8 @@ export const MOCK_GEAR_ITEMS: GearItem[] = [
       'Drivetrain': 'Shimano Deore M4100, 10 speed',
       'Brakes': 'Shimano MT200 hydraulic disc'
     },
-    availability: 'AVAILABLE',
-    stock: 4,
+    status: 'ACTIVE',
+    quantityTotal: 4,
     location: 'Denver, Colorado',
     rating: 4.9,
     reviewCount: 28,
@@ -32,7 +32,7 @@ export const MOCK_GEAR_ITEMS: GearItem[] = [
   },
   {
     id: '2',
-    title: 'MSR Hubba Hubba 2-Person Backpacking Tent',
+    name: 'MSR Hubba Hubba 2-Person Backpacking Tent',
     description: 'Ultra-lightweight 3-season tent with optimized symmetrical geometry and non-tapered floor to maximize room. Easton Syclone poles withstand heavy mountain gusts.',
     category: 'Camping',
     pricePerDay: 25,
@@ -48,8 +48,8 @@ export const MOCK_GEAR_ITEMS: GearItem[] = [
       'Floor Area': '2.7 sq m (29 sq ft)',
       'Rainfly': '20D ripstop nylon 1200mm Durashield'
     },
-    availability: 'AVAILABLE',
-    stock: 6,
+    status: 'ACTIVE',
+    quantityTotal: 6,
     location: 'Seattle, Washington',
     rating: 4.8,
     reviewCount: 42,
@@ -60,7 +60,7 @@ export const MOCK_GEAR_ITEMS: GearItem[] = [
   },
   {
     id: '3',
-    title: 'BOTE HD Aero Inflatable Paddle Board (11.5ft)',
+    name: 'BOTE HD Aero Inflatable Paddle Board (11.5ft)',
     description: 'Versatile inflatable stand-up paddleboard (SUP) engineered with AeroBOTE technology. Includes 3-piece adjustable paddle, removable fin, hand pump, and travel bag.',
     category: 'Water Sports',
     pricePerDay: 35,
@@ -76,8 +76,8 @@ export const MOCK_GEAR_ITEMS: GearItem[] = [
       'Weight': '30 lbs inflatable',
       'Inclusions': 'Paddle, pump, leash, travel bag'
     },
-    availability: 'AVAILABLE',
-    stock: 5,
+    status: 'ACTIVE',
+    quantityTotal: 5,
     location: 'Lake Tahoe, California',
     rating: 4.9,
     reviewCount: 19,
@@ -88,7 +88,7 @@ export const MOCK_GEAR_ITEMS: GearItem[] = [
   },
   {
     id: '4',
-    title: 'Burton Custom Flying V Snowboard 2026',
+    name: 'Burton Custom Flying V Snowboard 2026',
     description: 'Iconic all-mountain snowboard featuring Flying V rocker-camber profile for effortless float in powder and precise edge hold on hardpack snow.',
     category: 'Winter Sports',
     pricePerDay: 40,
@@ -104,8 +104,8 @@ export const MOCK_GEAR_ITEMS: GearItem[] = [
       'Core': 'Super Fly II 700G Dualzone EGD',
       'Bindings': 'Burton Cartel Re:Flex Included'
     },
-    availability: 'AVAILABLE',
-    stock: 3,
+    status: 'ACTIVE',
+    quantityTotal: 3,
     location: 'Salt Lake City, Utah',
     rating: 4.7,
     reviewCount: 31,
@@ -116,7 +116,7 @@ export const MOCK_GEAR_ITEMS: GearItem[] = [
   },
   {
     id: '5',
-    title: 'Concept2 Model D Rower with PM5 Monitor',
+    name: 'Concept2 Model D Rower with PM5 Monitor',
     description: 'The world standard for indoor rowing. Delivers low-impact, total body aerobic workout with nickel-plated chain and air-resistance flywheel.',
     category: 'Fitness & Gym',
     pricePerDay: 30,
@@ -132,8 +132,8 @@ export const MOCK_GEAR_ITEMS: GearItem[] = [
       'Storage': 'Separates into 2 parts easily',
       'Chain': 'Nickel-plated steel'
     },
-    availability: 'AVAILABLE',
-    stock: 2,
+    status: 'ACTIVE',
+    quantityTotal: 2,
     location: 'Austin, Texas',
     rating: 5.0,
     reviewCount: 14,
@@ -144,7 +144,7 @@ export const MOCK_GEAR_ITEMS: GearItem[] = [
   },
   {
     id: '6',
-    title: 'Black Diamond Momentum Climbing Harness & Helmet Set',
+    name: 'Black Diamond Momentum Climbing Harness & Helmet Set',
     description: 'Complete rock climbing package featuring Dual Core Construction harness, Half Dome helmet, ATC belay device, and locking carabiner.',
     category: 'Climbing',
     pricePerDay: 20,
@@ -160,8 +160,8 @@ export const MOCK_GEAR_ITEMS: GearItem[] = [
       'Gear Loops': '4 Pressure-molded loops',
       'Included': 'Harness, Helmet, Belay, Chalk bag'
     },
-    availability: 'AVAILABLE',
-    stock: 8,
+    status: 'ACTIVE',
+    quantityTotal: 8,
     location: 'Boulder, Colorado',
     rating: 4.8,
     reviewCount: 22,
@@ -172,7 +172,7 @@ export const MOCK_GEAR_ITEMS: GearItem[] = [
   },
   {
     id: '7',
-    title: 'Specialized Stumpjumper EVO Alloy Bike',
+    name: 'Specialized Stumpjumper EVO Alloy Bike',
     description: 'Progressive trail mountain bike with adjustable geometry, SWAT door internal storage, and 160mm front / 150mm rear suspension travel.',
     category: 'Cycling',
     pricePerDay: 55,
@@ -188,8 +188,8 @@ export const MOCK_GEAR_ITEMS: GearItem[] = [
       'Wheels': 'Roval Traverse 29 Tubeless Ready',
       'Drivetrain': 'SRAM NX Eagle 12-speed'
     },
-    availability: 'AVAILABLE',
-    stock: 2,
+    status: 'ACTIVE',
+    quantityTotal: 2,
     location: 'Moab, Utah',
     rating: 4.9,
     reviewCount: 36,
@@ -200,7 +200,7 @@ export const MOCK_GEAR_ITEMS: GearItem[] = [
   },
   {
     id: '8',
-    title: 'Osprey Atmos AG 65 Backpacking Pack',
+    name: 'Osprey Atmos AG 65 Backpacking Pack',
     description: 'Award-winning anti-gravity 65L backpacking pack with 3D suspended mesh system that contours seamlessly to your back and hips.',
     category: 'Camping',
     pricePerDay: 18,
@@ -216,8 +216,8 @@ export const MOCK_GEAR_ITEMS: GearItem[] = [
       'Fit': 'Adjustable torso & Fit-on-the-Fly belt',
       'Rain Cover': 'Included high-visibility cover'
     },
-    availability: 'AVAILABLE',
-    stock: 5,
+    status: 'ACTIVE',
+    quantityTotal: 5,
     location: 'Portland, Oregon',
     rating: 4.9,
     reviewCount: 50,
@@ -278,7 +278,7 @@ export const MOCK_ORDERS: RentalOrder[] = [
     pricePerDay: 45,
     totalPrice: 180,
     status: 'PAID',
-    paymentStatus: 'PAID',
+    paymentStatus: 'COMPLETED',
     paymentId: 'pay_stripe_9921',
     createdAt: '2026-08-08T10:00:00.000Z',
     updatedAt: '2026-08-08T10:05:00.000Z'
@@ -299,7 +299,7 @@ export const MOCK_ORDERS: RentalOrder[] = [
     pricePerDay: 25,
     totalPrice: 75,
     status: 'CONFIRMED',
-    paymentStatus: 'PAID',
+    paymentStatus: 'COMPLETED',
     paymentId: 'pay_stripe_8812',
     createdAt: '2026-08-07T12:00:00.000Z',
     updatedAt: '2026-08-07T12:10:00.000Z'
@@ -320,7 +320,7 @@ export const MOCK_ORDERS: RentalOrder[] = [
     pricePerDay: 35,
     totalPrice: 70,
     status: 'PICKED_UP',
-    paymentStatus: 'PAID',
+    paymentStatus: 'COMPLETED',
     paymentId: 'pay_ssl_3301',
     createdAt: '2026-08-06T15:30:00.000Z',
     updatedAt: '2026-08-06T15:35:00.000Z'

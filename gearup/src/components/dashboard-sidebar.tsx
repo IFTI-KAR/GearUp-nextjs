@@ -7,7 +7,6 @@ import { useAuth } from '@/lib/auth-context';
 import { 
   LayoutDashboard, 
   ShoppingBag, 
-  Store, 
   Users, 
   BarChart3, 
   Settings, 
@@ -39,7 +38,6 @@ export function DashboardSidebar() {
 
   const providerLinks = [
     { label: 'Overview', href: '/dashboard/provider', icon: LayoutDashboard },
-    { label: 'My Gear Listings', href: '/dashboard/provider/gear', icon: Store },
     { label: 'Add New Gear', href: '/dashboard/provider/gear/new', icon: PlusCircle },
     { label: 'Rental Orders', href: '/dashboard/provider/orders', icon: ShoppingBag },
     { label: 'Profile', href: '/dashboard/provider/profile', icon: User },
@@ -48,7 +46,6 @@ export function DashboardSidebar() {
 
   const customerLinks = [
     { label: 'Overview', href: '/dashboard/customer', icon: LayoutDashboard },
-    { label: 'My Rentals', href: '/dashboard/customer/orders', icon: ShoppingBag },
     { label: 'Browse Catalog', href: '/gear', icon: Compass },
     { label: 'Profile', href: '/dashboard/customer/profile', icon: User },
     { label: 'Settings', href: '/dashboard/customer/settings', icon: Settings },

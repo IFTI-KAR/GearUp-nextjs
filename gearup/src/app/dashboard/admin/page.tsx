@@ -34,22 +34,31 @@ import {
   CartesianGrid
 } from 'recharts';
 
-const REVENUE_DATA = [
-  { month: 'Jan', revenue: 4200, rentals: 48 },
-  { month: 'Feb', revenue: 5600, rentals: 62 },
-  { month: 'Mar', revenue: 7800, rentals: 84 },
-  { month: 'Apr', revenue: 9400, rentals: 105 },
-  { month: 'May', revenue: 12500, rentals: 142 },
-  { month: 'Jun', revenue: 15800, rentals: 178 },
-  { month: 'Jul', revenue: 18400, rentals: 210 },
-  { month: 'Aug', revenue: 21200, rentals: 245 },
-];
+const REVENUE_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
 
-const USER_ROLE_DATA = [
-  { name: 'Customers', value: 780, color: '#10b981' },
-  { name: 'Providers', value: 145, color: '#06b6d4' },
-  { name: 'Admins', value: 8, color: '#f59e0b' },
-];
+const buildRevenueChart = (orders: RentalOrder[]) => {
+  const revenue = new Map<string, number>();
+  const rentals = new Map<string, number>();
+  orders
+    .filter(o => o.paymentStatus === 'COMPLETED' || o.status === 'PAID')
+    .forEach(o => {
+      const key = o.createdAt ? o.createdAt.slice(0, 7) : '2026-08';
+      const label = new Date(`${key}-01T00:00:00`).toLocaleString('en-US', { month: 'short' });
+      revenue.set(label, (revenue.get(label) || 0) + (Number(o.totalPrice) || 0));
+      rentals.set(label, (rentals.get(label) || 0) + 1);
+    });
+  return REVENUE_MONTHS.map(month => ({ month, revenue: revenue.get(month) || 0, rentals: rentals.get(month) || 0 }));
+};
+
+const buildRoleDistribution = (users: User[]) => {
+  const counts: Record<string, number> = {};
+  users.forEach(u => { counts[u.role] = (counts[u.role] || 0) + 1; });
+  return [
+    { name: 'Customers', value: counts.CUSTOMER || 0, color: '#10b981' },
+    { name: 'Providers', value: counts.PROVIDER || 0, color: '#06b6d4' },
+    { name: 'Admins', value: counts.ADMIN || 0, color: '#f59e0b' },
+  ];
+};
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
@@ -113,7 +122,12 @@ export default function AdminDashboardPage() {
   const totalPages = Math.ceil(filteredUsers.length / pageSize) || 1;
   const paginatedUsers = filteredUsers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
-  const totalVolume = ordersList.filter(o => o.paymentStatus === 'PAID').reduce((sum, o) => sum + o.totalPrice, 0);
+  const totalVolume = ordersList.filter(o => o.paymentStatus === 'COMPLETED').reduce((sum, o) => sum + o.totalPrice, 0);
+  const revenueChartData = buildRevenueChart(ordersList);
+  const roleChartData = buildRoleDistribution(usersList);
+  const growthPct = revenueChartData.length > 1
+    ? Math.round(((revenueChartData[revenueChartData.length - 1].revenue - revenueChartData[0].revenue) / (revenueChartData[0].revenue || 1)) * 100)
+    : 0;
 
   return (
     <div className="space-y-8 pb-10">
@@ -148,7 +162,7 @@ export default function AdminDashboardPage() {
         </div>
         <div className="p-6 rounded-2xl glass-card border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 space-y-1 shadow-sm">
           <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Gross Rental Volume</span>
-          <span className="text-3xl font-black text-amber-600 dark:text-amber-400">${totalVolume || '21,200'}</span>
+          <span className="text-3xl font-black text-amber-600 dark:text-amber-400">${totalVolume}</span>
         </div>
       </div>
 
@@ -160,12 +174,12 @@ export default function AdminDashboardPage() {
             <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
               <BarChart2 className="w-5 h-5 text-emerald-500" /> Platform Gross Volume ($)
             </h3>
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">+34% vs last quarter</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">{growthPct >= 0 ? `+${growthPct}%` : `${growthPct}%`} vs first period</span>
           </div>
 
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={REVENUE_DATA}>
+              <BarChart data={revenueChartData}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
                 <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} />
                 <YAxis stroke="#94a3b8" fontSize={11} />
@@ -188,7 +202,7 @@ export default function AdminDashboardPage() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={USER_ROLE_DATA}
+                  data={roleChartData}
                   cx="50%"
                   cy="50%"
                   innerRadius={50}
@@ -196,7 +210,7 @@ export default function AdminDashboardPage() {
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {USER_ROLE_DATA.map((entry, index) => (
+                  {roleChartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -208,7 +222,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="space-y-1.5 pt-2">
-            {USER_ROLE_DATA.map((item) => (
+            {roleChartData.map((item) => (
               <div key={item.name} className="flex items-center justify-between text-xs">
                 <span className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
                   <span className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />

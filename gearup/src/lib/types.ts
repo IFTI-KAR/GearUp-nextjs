@@ -12,20 +12,22 @@ export interface User {
   createdAt: string;
 }
 
-export type GearAvailability = 'AVAILABLE' | 'UNAVAILABLE' | 'MAINTENANCE';
+export type GearStatus = 'ACTIVE' | 'INACTIVE';
 
 export interface GearItem {
   id: string;
-  title: string;
+  name: string;
   description: string;
+  categoryId?: string;
   category: string;
   pricePerDay: number;
   deposit: number;
   images: string[];
   brand: string;
   specifications: Record<string, string>;
-  availability: GearAvailability;
-  stock: number;
+  status: GearStatus;
+  quantityTotal: number;
+  quantityAvailable?: number;
   location: string;
   rating: number;
   reviewCount: number;
@@ -36,7 +38,7 @@ export interface GearItem {
 }
 
 export type OrderStatus = 'PLACED' | 'CONFIRMED' | 'PAID' | 'PICKED_UP' | 'RETURNED' | 'CANCELLED';
-export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED';
+export type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
 
 export interface RentalOrder {
   id: string;
@@ -66,7 +68,7 @@ export interface PaymentRecord {
   amount: number;
   currency: string;
   gateway: 'STRIPE' | 'SSLCOMMERZ';
-  status: 'SUCCESS' | 'PENDING' | 'FAILED';
+  status: 'PENDING' | 'COMPLETED' | 'FAILED';
   createdAt: string;
 }
 
@@ -94,6 +96,6 @@ export interface GearFilterParams {
   minPrice?: number;
   maxPrice?: number;
   brand?: string;
-  availability?: string;
+  status?: string;
   sortBy?: 'price-asc' | 'price-desc' | 'rating' | 'newest';
 }

@@ -28,6 +28,7 @@ export default function RegisterPage() {
   const { register: registerAuth, isLoading } = useAuth();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [socialLoading, setSocialLoading] = useState(false);
 
   const {
     register,
@@ -51,8 +52,11 @@ export default function RegisterPage() {
     }
   };
 
-  const handleSocialLogin = (provider: string) => {
-    toast.info(`${provider} Registration coming soon in production! Fill the registration form above.`);
+  const handleSocialLogin = async (provider: string) => {
+    setSocialLoading(true);
+    await registerAuth(`${provider} User`, `user-${Date.now()}@gearup.com`, undefined, 'CUSTOMER');
+    toast.success(`Account created with ${provider}`);
+    router.push('/dashboard/customer');
   };
 
   return (
@@ -166,13 +170,15 @@ export default function RegisterPage() {
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => handleSocialLogin('Google')}
-              className="py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center gap-2"
+              disabled={socialLoading}
+              className="py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition disabled:opacity-50 flex items-center justify-center gap-2"
             >
               Google
             </button>
             <button
               onClick={() => handleSocialLogin('GitHub')}
-              className="py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center gap-2"
+              disabled={socialLoading}
+              className="py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition disabled:opacity-50 flex items-center justify-center gap-2"
             >
               GitHub
             </button>

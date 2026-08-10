@@ -7,6 +7,7 @@ import { fetchApi } from '@/lib/api-client';
 import { GearItem, RentalOrder } from '@/lib/types';
 import { useAuth } from '@/lib/auth-context';
 import { toast } from 'sonner';
+import { format, parseISO } from 'date-fns';
 import { 
   Store, 
   Plus, 
@@ -26,14 +27,18 @@ import {
   CartesianGrid
 } from 'recharts';
 
-const PROVIDER_EARNINGS_DATA = [
-  { month: 'Mar', earnings: 1450 },
-  { month: 'Apr', earnings: 2100 },
-  { month: 'May', earnings: 3200 },
-  { month: 'Jun', earnings: 4100 },
-  { month: 'Jul', earnings: 5400 },
-  { month: 'Aug', earnings: 6800 },
-];
+const EARNINGS_MONTHS = ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
+
+const buildEarningsChart = (orders: RentalOrder[]) => {
+  const sums = new Map<string, number>();
+  orders
+    .filter(o => o.paymentStatus === 'COMPLETED' || o.status === 'PAID')
+    .forEach(o => {
+      const key = o.createdAt ? format(parseISO(o.createdAt), 'MMM') : 'Aug';
+      sums.set(key, (sums.get(key) || 0) + (Number(o.totalPrice) || 0));
+    });
+  return EARNINGS_MONTHS.map(month => ({ month, earnings: sums.get(month) || 0 }));
+};
 
 export default function ProviderDashboardPage() {
   const { user } = useAuth();
@@ -56,17 +61,17 @@ export default function ProviderDashboardPage() {
   });
 
   const toggleAvailabilityMutation = useMutation({
-    mutationFn: async ({ id, availability }: { id: string; availability: string }) => {
-      const newStatus = availability === 'AVAILABLE' ? 'UNAVAILABLE' : 'AVAILABLE';
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const newStatus = status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
       const res = await fetchApi(`/gear/${id}`, {
         method: 'PATCH',
-        body: JSON.stringify({ availability: newStatus }),
+        body: JSON.stringify({ status: newStatus }),
       });
       if (!res.success) throw new Error(res.error || 'Failed to toggle availability');
       return res.data;
     },
     onSuccess: (updated) => {
-      toast.success(`Availability updated to ${updated.availability}`);
+      toast.success(`Availability updated to ${updated.status === 'ACTIVE' ? 'Available' : 'Unavailable'}`);
       queryClient.invalidateQueries({ queryKey: ['provider-gear'] });
     },
     onError: (err: any) => {
@@ -87,7 +92,11 @@ export default function ProviderDashboardPage() {
   });
 
   const activeRentalsCount = orders.filter(o => o.status === 'PAID' || o.status === 'PICKED_UP').length;
-  const totalEarnings = orders.filter(o => o.paymentStatus === 'PAID').reduce((sum, o) => sum + o.totalPrice, 0);
+  const totalEarnings = orders.filter(o => o.paymentStatus === 'COMPLETED').reduce((sum, o) => sum + o.totalPrice, 0);
+  const earningsChartData = buildEarningsChart(orders);
+  const earningsGrowth = earningsChartData.length > 1
+    ? Math.round(((earningsChartData[earningsChartData.length - 1].earnings - earningsChartData[0].earnings) / (earningsChartData[0].earnings || 1)) * 100)
+    : 0;
 
   return (
     <div className="space-y-8 pb-10">
@@ -130,7 +139,7 @@ export default function ProviderDashboardPage() {
         </div>
         <div className="p-6 rounded-2xl glass-card border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 space-y-1 shadow-sm">
           <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Gross Rental Earnings</span>
-          <span className="text-3xl font-black text-purple-600 dark:text-purple-400">${totalEarnings || '6,800'}</span>
+          <span className="text-3xl font-black text-purple-600 dark:text-purple-400">${totalEarnings}</span>
         </div>
       </div>
 
@@ -141,13 +150,13 @@ export default function ProviderDashboardPage() {
             <BarChart2 className="w-5 h-5 text-cyan-500" /> Monthly Rental Earnings Breakdown ($)
           </h3>
           <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-1">
-            <TrendingUp className="w-4 h-4 text-emerald-500" /> +26% MoM Growth
+            <TrendingUp className="w-4 h-4 text-emerald-500" /> {earningsGrowth >= 0 ? `+${earningsGrowth}%` : `${earningsGrowth}%`} MoM Growth
           </span>
         </div>
 
         <div className="h-56 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={PROVIDER_EARNINGS_DATA}>
+            <BarChart data={earningsChartData}>
               <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
               <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} />
               <YAxis stroke="#94a3b8" fontSize={11} />
@@ -203,12 +212,12 @@ export default function ProviderDashboardPage() {
                       <div className="flex items-center gap-3">
                         <img
                           src={gear.images[0]}
-                          alt={gear.title}
+                          alt={gear.name}
                           className="w-12 h-10 rounded-lg object-cover border border-slate-200 dark:border-slate-800"
                         />
                         <div>
                           <Link href={`/gear/${gear.id}`} className="font-bold text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition line-clamp-1">
-                            {gear.title}
+                            {gear.name}
                           </Link>
                           <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">{gear.brand} • {gear.location}</span>
                         </div>
@@ -226,19 +235,19 @@ export default function ProviderDashboardPage() {
                     </td>
 
                     <td className="p-3 font-bold text-slate-900 dark:text-white whitespace-nowrap">
-                      {gear.stock} units
+                      {gear.quantityTotal} units
                     </td>
 
                     <td className="p-3 whitespace-nowrap">
                       <button
-                        onClick={() => toggleAvailabilityMutation.mutate({ id: gear.id, availability: gear.availability })}
+                        onClick={() => toggleAvailabilityMutation.mutate({ id: gear.id, status: gear.status })}
                         className={`px-3 py-1 rounded-full text-[11px] font-bold transition border ${
-                          gear.availability === 'AVAILABLE'
+                          gear.status === 'ACTIVE'
                             ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/40 hover:bg-emerald-200'
                             : 'bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-500/40 hover:bg-rose-200'
                         }`}
                       >
-                        {gear.availability === 'AVAILABLE' ? 'Available' : 'Unavailable'}
+                        {gear.status === 'ACTIVE' ? 'Available' : 'Unavailable'}
                       </button>
                     </td>
 

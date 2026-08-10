@@ -57,9 +57,6 @@ export default function GearDetailClient() {
         method: 'POST',
         body: JSON.stringify({
           gearId: id,
-          customerId: user?.id || 'usr-customer-1',
-          customerName: user?.name || 'Alex Johnson',
-          customerEmail: user?.email || 'customer@gearup.com',
           startDate,
           endDate,
         }),
@@ -120,7 +117,7 @@ export default function GearDetailClient() {
             <div className="relative aspect-[16/10] w-full rounded-3xl overflow-hidden glass-panel border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900">
               <Image
                 src={data.images[activeImageIdx] || data.images[0]}
-                alt={data.title}
+                alt={data.name}
                 fill
                 sizes="(max-width: 1024px) 100vw, 66vw"
                 className="object-cover"
@@ -166,7 +163,7 @@ export default function GearDetailClient() {
                 </div>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">{data.title}</h1>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">{data.name}</h1>
             </div>
 
             {/* Description */}
@@ -301,7 +298,7 @@ export default function GearDetailClient() {
             {/* CTA */}
             <button
               onClick={() => placeOrderMutation.mutate()}
-              disabled={placeOrderMutation.isPending || data.availability !== 'AVAILABLE'}
+              disabled={placeOrderMutation.isPending || data.status !== 'ACTIVE'}
               className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 font-extrabold text-white dark:text-slate-950 hover:from-emerald-600 hover:to-teal-500 transition shadow-lg shadow-emerald-500/25 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               <ShoppingBag className="w-5 h-5" />

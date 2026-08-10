@@ -6,9 +6,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { fetchApi } from '@/lib/api-client';
-import { useAuth } from '@/lib/auth-context';
 import { toast } from 'sonner';
-import { Store, ArrowLeft, Image as ImageIcon, Plus } from 'lucide-react';
+import { Store, ArrowLeft, Plus } from 'lucide-react';
 
 const CATEGORIES = ['Cycling', 'Camping', 'Water Sports', 'Winter Sports', 'Fitness & Gym', 'Climbing'];
 
@@ -28,7 +27,6 @@ type GearFormValues = z.infer<typeof gearSchema>;
 
 export default function AddGearPage() {
   const router = useRouter();
-  const { user } = useAuth();
 
   const {
     register,
@@ -56,11 +54,14 @@ export default function AddGearPage() {
     const res = await fetchApi('/gear', {
       method: 'POST',
       body: JSON.stringify({
-        ...values,
+        name: values.title,
+        category: values.category,
+        brand: values.brand,
+        pricePerDay: values.pricePerDay,
+        quantityTotal: values.stock,
+        location: values.location,
+        description: values.description,
         images: [values.imageUrl],
-        providerId: user?.id || 'usr-provider-1',
-        providerName: user?.name || 'Mountain Peak Rentals',
-        providerEmail: user?.email || 'provider@gearup.com',
       }),
     });
 
@@ -76,53 +77,53 @@ export default function AddGearPage() {
     <div className="max-w-3xl mx-auto px-4 py-10 space-y-6">
       <button
         onClick={() => router.back()}
-        className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white transition"
+        className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Provider Portal
       </button>
 
-      <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-slate-800 space-y-8 shadow-2xl shadow-cyan-950/20">
+      <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-8 shadow-xl shadow-slate-200/50 dark:shadow-cyan-950/20">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-semibold">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-xs font-semibold">
             <Store className="w-3.5 h-3.5" /> Provider Form
           </div>
-          <h1 className="text-2xl font-black text-white">List New Rental Equipment</h1>
-          <p className="text-xs text-slate-400">Add equipment details, daily rental rate, security deposit, and image URL</p>
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white">List New Rental Equipment</h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Add equipment details, daily rental rate, security deposit, and image URL</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Title & Brand */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300 block">Equipment Title</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">Equipment Title</label>
               <input
                 type="text"
                 {...register('title')}
-                className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500"
                 placeholder="e.g. Specialized Trail Mountain Bike"
               />
-              {errors.title && <p className="text-[11px] text-red-400 font-medium">{errors.title.message}</p>}
+              {errors.title && <p className="text-[11px] text-red-500 dark:text-red-400 font-medium">{errors.title.message}</p>}
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300 block">Brand / Manufacturer</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">Brand / Manufacturer</label>
               <input
                 type="text"
                 {...register('brand')}
-                className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500"
                 placeholder="e.g. Specialized, Burton, MSR"
               />
-              {errors.brand && <p className="text-[11px] text-red-400 font-medium">{errors.brand.message}</p>}
+              {errors.brand && <p className="text-[11px] text-red-500 dark:text-red-400 font-medium">{errors.brand.message}</p>}
             </div>
           </div>
 
           {/* Category & Location */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300 block">Category</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">Category</label>
               <select
                 {...register('category')}
-                className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
+                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -133,58 +134,59 @@ export default function AddGearPage() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300 block">Pickup Location / City</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">Pickup Location / City</label>
               <input
                 type="text"
                 {...register('location')}
-                className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500"
                 placeholder="e.g. Denver, CO"
               />
-              {errors.location && <p className="text-[11px] text-red-400 font-medium">{errors.location.message}</p>}
+              {errors.location && <p className="text-[11px] text-red-500 dark:text-red-400 font-medium">{errors.location.message}</p>}
             </div>
           </div>
 
           {/* Pricing & Stock */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300 block">Daily Rental Rate ($)</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">Daily Rental Rate ($)</label>
               <input
                 type="number"
                 {...register('pricePerDay')}
-                className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500 font-extrabold text-emerald-400"
+                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500 font-extrabold text-emerald-600 dark:text-emerald-400"
               />
-              {errors.pricePerDay && <p className="text-[11px] text-red-400 font-medium">{errors.pricePerDay.message}</p>}
+              {errors.pricePerDay && <p className="text-[11px] text-red-500 dark:text-red-400 font-medium">{errors.pricePerDay.message}</p>}
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300 block">Refundable Deposit ($)</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">Refundable Deposit ($)</label>
               <input
                 type="number"
                 {...register('deposit')}
-                className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
+                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300 block">Available Units / Stock</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">Available Units / Stock</label>
               <input
                 type="number"
                 {...register('stock')}
-                className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
+                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500"
               />
             </div>
           </div>
 
           {/* Image URL & Live Preview */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-slate-300 block">Equipment Image URL</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">Equipment Image URL</label>
             <input
               type="text"
               {...register('imageUrl')}
-              className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
+              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500 font-mono"
             />
             {previewUrl && (
-              <div className="mt-2 relative w-48 h-32 rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <div className="mt-2 relative w-48 h-32 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
                 <span className="absolute bottom-1 right-1 text-[10px] bg-slate-950/80 px-1.5 py-0.5 rounded text-slate-300">
                   Image Preview
@@ -195,20 +197,20 @@ export default function AddGearPage() {
 
           {/* Description */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-300 block">Description & Specs</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">Description & Specs</label>
             <textarea
               rows={4}
               {...register('description')}
-              className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500"
             />
-            {errors.description && <p className="text-[11px] text-red-400 font-medium">{errors.description.message}</p>}
+            {errors.description && <p className="text-[11px] text-red-500 dark:text-red-400 font-medium">{errors.description.message}</p>}
           </div>
 
           {/* Submit */}
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-3.5 rounded-xl bg-emerald-500 text-slate-950 font-extrabold hover:bg-emerald-400 transition shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
+            className="w-full py-3.5 rounded-xl bg-emerald-500 text-white dark:text-slate-950 font-extrabold hover:bg-emerald-400 transition shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
           >
             <Plus className="w-5 h-5" />
             {isSubmitting ? 'Publishing Listing...' : 'Publish Equipment Listing'}

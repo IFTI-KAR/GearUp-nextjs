@@ -90,7 +90,7 @@ function handleMockFallback<T>(endpoint: string, options: RequestInit): ApiRespo
       const body = options.body ? JSON.parse(options.body as string) : {};
       const newItem: GearItem = {
         id: `gear-${Date.now().toString().slice(-4)}`,
-        title: body.title || 'New Sports Equipment',
+        name: body.name || 'New Sports Equipment',
         description: body.description || 'Quality outdoor rental gear.',
         category: body.category || 'Cycling',
         pricePerDay: Number(body.pricePerDay) || 30,
@@ -100,8 +100,9 @@ function handleMockFallback<T>(endpoint: string, options: RequestInit): ApiRespo
         ],
         brand: body.brand || 'GearUp',
         specifications: body.specifications || { 'Condition': 'Excellent' },
-        availability: 'AVAILABLE',
-        stock: Number(body.stock) || 1,
+        status: 'ACTIVE',
+        quantityTotal: Number(body.quantityTotal) || Math.max(Number(body.stock) || 1, 1),
+        quantityAvailable: Number(body.quantityAvailable) || Number(body.quantityTotal) || Math.max(Number(body.stock) || 1, 1),
         location: body.location || 'Denver, CO',
         rating: 5.0,
         reviewCount: 1,
@@ -125,7 +126,7 @@ function handleMockFallback<T>(endpoint: string, options: RequestInit): ApiRespo
     }
     if (search) {
       list = list.filter(g =>
-        g.title.toLowerCase().includes(search) ||
+        g.name.toLowerCase().includes(search) ||
         g.description.toLowerCase().includes(search) ||
         g.brand.toLowerCase().includes(search) ||
         g.location.toLowerCase().includes(search)
@@ -176,7 +177,7 @@ function handleMockFallback<T>(endpoint: string, options: RequestInit): ApiRespo
       const newOrder: RentalOrder = {
         id: `ord-${Date.now().toString().slice(-4)}`,
         gearId: targetGear.id,
-        gearTitle: targetGear.title,
+        gearTitle: targetGear.name,
         gearImage: targetGear.images[0],
         customerId: body.customerId || 'usr-customer-1',
         customerName: body.customerName || 'Alex Johnson',
@@ -230,14 +231,37 @@ function handleMockFallback<T>(endpoint: string, options: RequestInit): ApiRespo
 
   // 7. /reviews
   if (cleanPath === '/reviews') {
+    if (options.method === 'POST') {
+      const body = options.body ? JSON.parse(options.body as string) : {};
+      const newReview = {
+        id: `rev-${Date.now().toString().slice(-4)}`,
+        gearId: body.gearItemId,
+        rentalId: body.rentalOrderId,
+        customerId: body.customerId || 'usr-customer-1',
+        customerName: body.customerName || 'Alex Johnson',
+        rating: Number(body.rating) || 5,
+        comment: body.comment || '',
+        createdAt: new Date().toISOString(),
+      };
+      MOCK_REVIEWS.unshift(newReview as any);
+      return { success: true, data: newReview as any };
+    }
     return { success: true, data: MOCK_REVIEWS as any };
   }
 
   // 8. /payments/create
   if (cleanPath === '/payments/create') {
+    const body = options.body ? JSON.parse(options.body as string) : {};
+    const orderId = body.rentalOrderId || '';
+    const paymentId = `pay_${Date.now()}`;
+    const gateway = body.method || 'STRIPE';
     return {
       success: true,
-      data: { checkoutUrl: '/payment/success', paymentId: `pay_${Date.now()}` } as any
+      data: {
+        checkoutUrl: `/payment/success?order_id=${orderId}&payment_id=${paymentId}&gateway=${gateway}`,
+        sessionId: `cs_${Date.now()}`,
+        paymentId,
+      } as any
     };
   }
 
