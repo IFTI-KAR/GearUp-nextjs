@@ -308,7 +308,7 @@ export const MOCK_ORDERS: RentalOrder[] = [
     id: 'ord-103',
     gearId: '3',
     gearTitle: 'BOTE HD Aero Inflatable Paddle Board (11.5ft)',
-    gearImage: 'https://images.unsplash.com/photo-1517649763962-0c623266010b?auto=format&fit=crop&w=400&q=80',
+    gearImage: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=400&q=80',
     customerId: 'usr-customer-2',
     customerName: 'Elena Rostova',
     customerEmail: 'elena@example.com',

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchApi } from '@/lib/api-client';
 import { GearItem, Review } from '@/lib/types';
 import { useAuth } from '@/lib/auth-context';
@@ -28,6 +28,7 @@ export default function GearDetailClient() {
   const router = useRouter();
   const id = params.id as string;
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [startDate, setStartDate] = useState(format(addDays(new Date(), 1), 'yyyy-MM-dd'));
@@ -68,6 +69,7 @@ export default function GearDetailClient() {
       toast.success('Rental order placed successfully! Provider will confirm shortly.', {
         description: `Order ID: ${order.id}`,
       });
+      queryClient.invalidateQueries({ queryKey: ['customer-orders'] });
       router.push('/dashboard/customer');
     },
     onError: (err: any) => {

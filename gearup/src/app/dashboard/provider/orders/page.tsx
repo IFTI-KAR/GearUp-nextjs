@@ -45,6 +45,7 @@ export default function ProviderOrdersPage() {
         description: `Order #${updatedOrder.id} is now ${updatedOrder.status}`,
       });
       queryClient.invalidateQueries({ queryKey: ['provider-incoming-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['provider-orders-overview'] });
     },
     onError: (err: any) => {
       toast.error('Status update failed', { description: err.message });

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -27,6 +28,7 @@ type GearFormValues = z.infer<typeof gearSchema>;
 
 export default function AddGearPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const {
     register,
@@ -67,6 +69,7 @@ export default function AddGearPage() {
 
     if (res.success) {
       toast.success('Equipment listed successfully!');
+      queryClient.invalidateQueries({ queryKey: ['provider-gear'] });
       router.push('/dashboard/provider');
     } else {
       toast.error('Listing failed', { description: res.error });
